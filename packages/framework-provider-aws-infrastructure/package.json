@@ -1,6 +1,6 @@
 {
   "name": "@boostercloud/framework-provider-aws-infrastructure",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Handle the Booster deployment process to AWS",
   "keywords": [
     "framework-provider-aws-infrastructure"
@@ -37,9 +37,9 @@
     "@aws-cdk/aws-s3-deployment": "^1.170.0",
     "@aws-cdk/core": "^1.170.0",
     "@aws-cdk/cx-api": "^1.170.0",
-    "@boostercloud/framework-common-helpers": "workspace:^1.0.0",
-    "@boostercloud/framework-provider-aws": "workspace:^1.0.0",
-    "@boostercloud/framework-types": "workspace:^1.0.0",
+    "@boostercloud/framework-common-helpers": "workspace:^1.0.2",
+    "@boostercloud/framework-provider-aws": "workspace:^1.0.2",
+    "@boostercloud/framework-types": "workspace:^1.0.2",
     "constructs": "^3.3.69",
     "aws-cdk": "^1.170.0",
     "aws-sdk": "2.853.0",
@@ -57,7 +57,7 @@
     "clean": "rimraf ./dist tsconfig.tsbuildinfo",
     "prepack": "tsc -b tsconfig.json",
     "test:provider-aws-infrastructure": "npm run test",
-    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\""
+    "test": "nyc --extension .ts mocha --timeout 600s --forbid-only \"test/**/*.test.ts\""
   },
   "bugs": {
     "url": "https://github.com/boostercloud/booster/issues"
