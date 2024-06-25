@@ -1,25 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  TraceActionTypes,
   AnyClass,
   BoosterConfig,
   FilterFor,
   GraphQLOperation,
   InvalidParameterError,
   NotFoundError,
+  ProjectionFor,
   ReadModelInterface,
   ReadModelListResult,
+  ReadModelMetadata,
   ReadModelRequestEnvelope,
   ReadOnlyNonEmptyArray,
   SortFor,
   SubscriptionEnvelope,
-  ProjectionFor,
+  TraceActionTypes,
 } from '@boostercloud/framework-types'
 import { createInstance, createInstances, getLogger } from '@boostercloud/framework-common-helpers'
 import { Booster } from './booster'
 import { applyReadModelRequestBeforeFunctions } from './services/filter-helpers'
 import { ReadModelSchemaMigrator } from './read-model-schema-migrator'
 import { Trace } from './instrumentation'
+import { PropertyMetadata } from '@boostercloud/metadata-booster'
 
 export class BoosterReadModelsReader {
   public constructor(readonly config: BoosterConfig) {}
@@ -88,6 +90,23 @@ export class BoosterReadModelsReader {
     select?: ProjectionFor<TReadModel>
   ): Promise<Array<TReadModel> | ReadModelListResult<TReadModel>> {
     const readModelName = readModelClass.name
+
+    let selectWithDependencies: ProjectionFor<TReadModel> | undefined = undefined
+    const calculatedFieldsDependencies = this.getCalculatedFieldsDependencies(readModelClass)
+
+    if (select && Object.keys(calculatedFieldsDependencies).length > 0) {
+      const extendedSelect = new Set<string>(select)
+
+      select.forEach((field: any) => {
+        const topLevelField = field.split('.')[0].replace('[]', '')
+        if (calculatedFieldsDependencies[topLevelField]) {
+          calculatedFieldsDependencies[topLevelField].map((dependency) => extendedSelect.add(dependency))
+        }
+      })
+
+      selectWithDependencies = Array.from(extendedSelect) as ProjectionFor<TReadModel>
+    }
+
     const searchResult = await this.config.provider.readModels.search<TReadModel>(
       this.config,
       readModelName,
@@ -96,7 +115,7 @@ export class BoosterReadModelsReader {
       limit,
       afterCursor,
       paginatedVersion ?? false,
-      select
+      selectWithDependencies ?? select
     )
 
     if (select) {
@@ -215,5 +234,16 @@ export class BoosterReadModelsReader {
       operation,
     }
     return this.config.provider.readModels.subscribe(this.config, subscription)
+  }
+
+  private getCalculatedFieldsDependencies(readModelClass: AnyClass): Record<string, Array<string>> {
+    const readModelMetadata: ReadModelMetadata = this.config.readModels[readModelClass.name]
+
+    const dependenciesMap: Record<string, Array<string>> = {}
+    readModelMetadata?.properties.map((property: PropertyMetadata): void => {
+      dependenciesMap[property.name] = property.dependencies
+    })
+
+    return dependenciesMap
   }
 }
