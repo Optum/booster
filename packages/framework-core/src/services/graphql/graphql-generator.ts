@@ -370,6 +370,7 @@ function toReadModelRequestEnvelope(
     paginatedVersion,
     version: 1, // TODO: How to pass the version through GraphQL?
     select,
+    skipInstance: false,
   }
 }
 

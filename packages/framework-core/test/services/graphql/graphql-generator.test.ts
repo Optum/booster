@@ -188,6 +188,7 @@ describe('GraphQL generator', () => {
           paginatedVersion: false,
           version: 1,
           select: undefined,
+          skipInstance: false,
         }
 
         await returnedFunction('', {}, mockResolverContext, { fieldNodes: [] } as any)
@@ -448,6 +449,7 @@ describe('GraphQL generator', () => {
           paginatedVersion: false,
           version: 1,
           select: undefined,
+          skipInstance: false,
         })
       })
 

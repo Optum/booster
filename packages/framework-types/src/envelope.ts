@@ -141,6 +141,7 @@ export interface ReadModelRequestEnvelope<TReadModel extends ReadModelInterface>
   afterCursor?: unknown
   paginatedVersion?: boolean // Used only for retrocompatibility
   select?: ProjectionFor<TReadModel>
+  skipInstance?: boolean
 }
 
 export interface ReadModelRequestArgs<TReadModel extends ReadModelInterface> {

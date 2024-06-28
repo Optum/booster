@@ -10,7 +10,8 @@ export type SearcherFunction<TObject, TResult> = (
   limit?: number,
   afterCursor?: any,
   paginatedVersion?: boolean,
-  select?: ProjectionFor<TObject>
+  select?: ProjectionFor<TObject>,
+  skipInstance?: boolean
 ) => Promise<TResult>
 
 export type FinderByKeyFunction<TObject> = (
@@ -42,6 +43,7 @@ export class Searcher<
   private _sortByList: SortFor<TObject> = {}
   private _paginatedVersion = false
   private _selectFor?: ProjectionFor<TObject>
+  private _skipInstance? = false
 
   /**
    * @param objectClass The class of the object you want to run the search for.
@@ -77,6 +79,11 @@ export class Searcher<
 
   public select(select?: ProjectionFor<TObject>): SearchAfterSelect<TObject, TContainer> {
     if (select) this._selectFor = select
+    return this
+  }
+
+  public skipInstance(skipInstance?: boolean): this {
+    if (skipInstance) this._skipInstance = skipInstance
     return this
   }
 
@@ -129,7 +136,8 @@ export class Searcher<
       this._limit,
       this._afterCursor,
       this._paginatedVersion,
-      this._selectFor
+      this._selectFor,
+      this._skipInstance
     )
   }
 }
